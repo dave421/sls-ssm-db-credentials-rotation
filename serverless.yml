@@ -1,0 +1,57 @@
+service: database-credentials-rotation
+
+useDotenv: true
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-2
+  stage: ${opt:stage, 'dev'}
+  memorySize: 512
+  timeout: 30
+  tags:
+    environment: ${self:provider.stage}
+  versionFunctions: false
+  iamRoleStatements:
+    - Effect: "Allow"
+      Resource: "*"
+      Action:
+        - "kms:*"
+        - "ec2:DescribeNetworkInterfaces"
+        - "ec2:CreateNetworkInterface"
+        - "ec2:DeleteNetworkInterface"
+        - "ec2:DescribeInstances"
+        - "ec2:AttachNetworkInterface"
+    - Effect: Allow
+      Action:
+        - "secretsmanager:GetSecretValue"
+        - "secretsmanager:UpdateSecret"
+      Resource: "*"
+
+custom:
+  account: xxxxxxxxx
+  errorTopic: arn:aws:sns:${self:provider.region}:${self:custom.account}:${self:provider.stage}-errorTopic
+  lambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.account}:function:${self:provider.stage}-"
+  version: v1
+
+functions:
+  smRotateSecretsOne:
+    handler: ./src/RotateSecretsOneHandler.handler
+    name: RotateSecretsOne-${self:custom.version}
+    description: Rotates the secrets for the first secret manager user
+    onError: ${self:custom.errorTopic}
+    logRetentionInDays: 3
+    events:
+      - cloudwatchLog:
+          logGroup: "/aws/lambda/mysql-rotate-1"
+
+  smRotateSecretsTwo:
+    handler: ./src/RotateSecretsTwoHandler.handler
+    name: RotateSecretsTwo-${self:custom.version}
+    description: Rotates the secrets for the second secret manager user
+    onError: ${self:custom.errorTopic}
+    logRetentionInDays: 3
+    events:
+      - cloudwatchLog:
+          logGroup: "/aws/lambda/mysql-rotate-2"

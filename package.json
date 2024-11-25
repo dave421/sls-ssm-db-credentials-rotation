@@ -1,0 +1,25 @@
+{
+  "name": "sls-ssm-db-credentials-rotation-example",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dave Henderson",
+    "url": "https://elysiumcode.co.uk"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.57",
+    "@types/mysql": "^2.15.21",
+    "aws-lambda": "^1.0.6"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.699.0",
+    "@types/node": "^22.8.1",
+    "@types/node-fetch": "^2.5.7",
+    "aws-sdk": "^2.939.0",
+    "knex": "^3.1.0",
+    "mysql": "^2.18.1",
+    "objection": "^3.1.5",
+    "serverless": "^3.37.0",
+    "ts-node": "^10.9.2"
+  }
+}
